@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 """
-Physics Utilities Module v2.0 - Enhanced with Sanitization
+Physics Utilities Module v2.1 - Advanced Physics Suite with Extended Calculations
 
 Comprehensive physics calculation tools and utilities for the Physics Application Suite.
 Includes real experimental data handling, statistical analysis, advanced calculations,
-and comprehensive input sanitization and validation.
+comprehensive input sanitization and validation, and specialized utilities for
+fluid dynamics, relativity, nuclear physics, and astrophysics.
 
 Features:
-- Input sanitization and validation
-- Range checking for physical values
-- Unit validation and conversion safety
-- Formula input security
-- Experimental data validation
-- Security checks for all operations
+- Input sanitization and validation for all physics domains
+- Range checking for physical values across all physics areas
+- Unit validation and conversion safety (21 unit categories)
+- Formula input security for advanced physics equations
+- Experimental data validation for complex physics experiments
+- Security checks for all operations including extreme value physics
+- Specialized constants and utilities for advanced physics modules
 
 Author: Physics Application Suite Team
-Version: 2.0.1
+Version: 2.1.0
 Date: February 2026
 """
 
@@ -34,16 +36,39 @@ class ValidationError(Exception):
     pass
 
 class PhysicsRange(Enum):
-    """Defines reasonable ranges for physics quantities"""
+    """Defines reasonable ranges for physics quantities across all physics domains"""
+    # Classical Mechanics
     VELOCITY = (0, 3e8)  # 0 to speed of light
     MASS = (1e-31, 1e50)  # electron mass to universe mass
     LENGTH = (1e-18, 1e26)  # Planck length to observable universe
     TIME = (1e-44, 1e18)  # Planck time to age of universe
-    TEMPERATURE = (0, 1e12)  # Absolute zero to stellar core
     ENERGY = (0, 1e69)  # 0 to Planck energy
     FREQUENCY = (0, 1e43)  # 0 to Planck frequency
     ANGLE = (0, 2*math.pi)  # 0 to full rotation
     PROBABILITY = (0, 1)  # 0 to 1
+    
+    # Thermodynamics
+    TEMPERATURE = (0, 1e12)  # Absolute zero to stellar core
+    PRESSURE = (0, 1e20)  # 0 to neutron star core pressure
+    
+    # Fluid Dynamics
+    REYNOLDS_NUMBER = (0, 1e10)  # Laminar to extreme turbulent flow
+    VISCOSITY = (1e-6, 1e6)  # Gas to ultra-viscous liquid (Pa·s)
+    DENSITY = (1e-5, 1e20)  # Ultra-low density gas to neutron star
+    
+    # Relativity
+    LORENTZ_FACTOR = (1, 1e10)  # Rest to ultra-relativistic
+    PROPER_TIME = (1e-44, 1e18)  # Planck time to cosmic time
+    
+    # Nuclear Physics
+    NUCLEAR_MASS = (1e-30, 1e-20)  # Light nuclei to superheavy elements
+    DECAY_CONSTANT = (1e-25, 1e10)  # Stable to extremely unstable
+    ACTIVITY = (0, 1e30)  # 0 to extreme radioactive source (Bq)
+    
+    # Astrophysics
+    STELLAR_MASS = (1e28, 1e32)  # Brown dwarf to hypergiant (kg)
+    LUMINOSITY = (1e20, 1e32)  # Dim star to hypergiant luminosity (W)
+    DISTANCE = (1e3, 1e26)  # Nearby objects to cosmic horizon (m)
 
 class PhysicsSanitizer:
     """Comprehensive sanitization and validation for physics calculations"""
@@ -239,6 +264,78 @@ class PhysicsCalculator:
             "Half Life": lambda lambda_decay: math.log(2) / lambda_decay if lambda_decay != 0 else 0,
             "Binding Energy": lambda mass_defect, c=2.998e8: mass_defect * c**2,
             "Bohr Radius": lambda n: 5.292e-11 * n**2  # Bohr radius for hydrogen-like atoms
+        }
+        return calculations
+    
+    @staticmethod
+    def fluid_dynamics_calculator():
+        """Fluid dynamics calculations"""
+        calculations = {
+            "Reynolds Number": lambda rho, v, L, mu: (rho * v * L / mu) if mu != 0 else 0,
+            "Bernoulli Pressure": lambda rho, v1, v2, h1, h2, g=9.81: 0.5 * rho * (v1**2 - v2**2) + rho * g * (h1 - h2),
+            "Viscous Flow Rate": lambda r, delta_P, L, mu: (math.pi * r**4 * delta_P) / (8 * mu * L) if (mu * L) != 0 else 0,
+            "Drag Force": lambda Cd, rho, v, A: 0.5 * Cd * rho * v**2 * A,
+            "Dynamic Pressure": lambda rho, v: 0.5 * rho * v**2,
+            "Flow Velocity": lambda Q, A: Q / A if A != 0 else 0,
+            "Continuity Equation": lambda A1, v1, A2: (A1 * v1 / A2) if A2 != 0 else 0,
+            "Hydrostatic Pressure": lambda rho, g, h: rho * g * h,
+            "Terminal Velocity": lambda m, g, rho, Cd, A: math.sqrt(2 * m * g / (rho * Cd * A)) if (rho * Cd * A) != 0 else 0,
+            "Pipe Flow Velocity": lambda Q, D: 4 * Q / (math.pi * D**2) if D != 0 else 0
+        }
+        return calculations
+    
+    @staticmethod
+    def relativity_calculator():
+        """Special and general relativity calculations"""
+        calculations = {
+            "Lorentz Factor": lambda v, c=2.998e8: 1 / math.sqrt(1 - (v/c)**2) if abs(v) < c and c != 0 else float('inf'),
+            "Time Dilation": lambda t0, v, c=2.998e8: t0 / math.sqrt(1 - (v/c)**2) if abs(v) < c and c != 0 else float('inf'),
+            "Length Contraction": lambda L0, v, c=2.998e8: L0 * math.sqrt(1 - (v/c)**2) if abs(v) < c and c != 0 else 0,
+            "Relativistic Energy": lambda m, v, c=2.998e8: m * c**2 / math.sqrt(1 - (v/c)**2) if abs(v) < c and c != 0 else float('inf'),
+            "Relativistic Momentum": lambda m, v, c=2.998e8: m * v / math.sqrt(1 - (v/c)**2) if abs(v) < c and c != 0 else float('inf'),
+            "Mass Energy": lambda m, c=2.998e8: m * c**2,
+            "Velocity Addition": lambda v1, v2, c=2.998e8: (v1 + v2) / (1 + v1*v2/c**2) if (1 + v1*v2/c**2) != 0 else 0,
+            "Doppler Shift": lambda f0, v, c=2.998e8: f0 * math.sqrt((1 + v/c) / (1 - v/c)) if abs(v) < c and (1 - v/c) > 0 else 0,
+            "Schwarzschild Radius": lambda M, G=6.674e-11, c=2.998e8: 2 * G * M / c**2 if c != 0 else 0,
+            "Escape Velocity": lambda G, M, r: math.sqrt(2 * G * M / r) if r != 0 else 0
+        }
+        return calculations
+    
+    @staticmethod
+    def nuclear_physics_calculator():
+        """Nuclear physics calculations"""
+        calculations = {
+            "Binding Energy": lambda mass_defect, c=2.998e8: mass_defect * c**2,
+            "Q Value": lambda mass_initial, mass_final, c=2.998e8: (mass_initial - mass_final) * c**2,
+            "Decay Constant": lambda half_life: math.log(2) / half_life if half_life != 0 else 0,
+            "Activity": lambda N, lambda_decay: N * lambda_decay,
+            "Decay Law": lambda N0, lambda_decay, t: N0 * math.exp(-lambda_decay * t),
+            "Half Life": lambda lambda_decay: math.log(2) / lambda_decay if lambda_decay != 0 else 0,
+            "Mean Lifetime": lambda lambda_decay: 1 / lambda_decay if lambda_decay != 0 else 0,
+            "Nuclear Radius": lambda A: 1.2e-15 * A**(1/3),  # A is mass number
+            "Cross Section": lambda sigma, n: sigma * n,  # reaction probability
+            "Fission Energy": lambda: 200e6 * 1.602e-19  # ~200 MeV in Joules
+        }
+        return calculations
+    
+    @staticmethod
+    def astrophysics_calculator():
+        """Astrophysics calculations"""
+        calculations = {
+            "Schwarzschild Radius": lambda M, G=6.674e-11, c=2.998e8: 2 * G * M / c**2 if c != 0 else 0,
+            "Stellar Luminosity": lambda R, T, sigma=5.67e-8: 4 * math.pi * R**2 * sigma * T**4,
+            "Main Sequence Lifetime": lambda M, M_sun=1.989e30: 10e9 * (M_sun / M)**2.5 if M != 0 else 0,  # years
+            "Hubble Distance": lambda v, H0=70: v / H0 if H0 != 0 else 0,  # km/s/Mpc
+            "Redshift": lambda lambda_obs, lambda_rest: (lambda_obs - lambda_rest) / lambda_rest if lambda_rest != 0 else 0,
+            "Angular Diameter": lambda D, d: D / d if d != 0 else 0,  # small angle approximation
+            "Parallax Distance": lambda p: 1 / p if p != 0 else 0,  # distance in parsecs
+            "Apparent Magnitude": lambda flux, flux_ref: -2.5 * math.log10(flux / flux_ref) if flux_ref != 0 and flux > 0 else 0,
+            "Absolute Magnitude": lambda m, d: m - 5 * math.log10(d / 10) if d > 0 else 0,
+            "Escape Velocity": lambda G, M, r: math.sqrt(2 * G * M / r) if r != 0 else 0,
+            "Orbital Velocity": lambda G, M, r: math.sqrt(G * M / r) if r != 0 else 0,
+            "Kepler Third Law": lambda a, G, M: math.sqrt(4 * math.pi**2 * a**3 / (G * M)) if M != 0 else 0,
+            "Tidal Force": lambda G, M, m, r, dr: 2 * G * M * m * dr / r**3 if r != 0 else 0,
+            "Surface Gravity": lambda G, M, R: G * M / R**2 if R != 0 else 0
         }
         return calculations
 
@@ -494,6 +591,40 @@ class UnitConverter:
                 "rad": 0.01,
                 "Sv": 1.0,  # Sievert
                 "rem": 0.01
+            },
+            "Resistance": {
+                "Ω": 1.0,  # Ohm
+                "kΩ": 1000.0,
+                "MΩ": 1e6,
+                "mΩ": 0.001,
+                "μΩ": 1e-6
+            },
+            "Heat Capacity": {
+                "J/K": 1.0,
+                "cal/K": 4.184,
+                "kJ/K": 1000.0,
+                "J/(kg·K)": 1.0,  # Specific heat capacity
+                "cal/(g·K)": 4184.0
+            },
+            "Entropy": {
+                "J/K": 1.0,
+                "cal/K": 4.184,
+                "kJ/K": 1000.0,
+                "eV/K": 1.602176634e-19
+            },
+            "Luminosity": {
+                "W": 1.0,
+                "L☉": 3.828e26,  # Solar luminosity
+                "erg/s": 1e-7,
+                "kW": 1000.0
+            },
+            "Astronomical Distance": {
+                "m": 1.0,
+                "AU": 1.496e11,  # Astronomical Unit
+                "ly": 9.461e15,  # Light year
+                "pc": 3.086e16,  # Parsec
+                "kpc": 3.086e19,  # Kiloparsec
+                "Mpc": 3.086e22  # Megaparsec
             },
             "Wavelength": {
                 "m": 1.0,

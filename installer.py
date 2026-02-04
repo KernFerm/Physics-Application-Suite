@@ -9,6 +9,11 @@ Features:
 - System requirement verification
 - Safe dependency installation
 - Error recovery and cleanup
+
+
+Author: BubblesTheDev
+Version: 2.0.2
+Date: February 2026
 """
 
 import sys
@@ -447,3 +452,4 @@ if __name__ == "__main__":
         print(f"\n\n❌ Critical error: {error_msg}")
         cleanup_manager.cleanup()
         input("Press Enter to exit...")
+

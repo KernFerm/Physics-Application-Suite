@@ -175,21 +175,6 @@ The application requires the following Python packages:
 - **Graphics**: Hardware acceleration for matplotlib rendering
 - **Network**: Internet connection for initial dependency installation
 
-## File Structure
-
-```
-physics-application/
-├── main.py                 # Main PyQt5 application entry point
-├── physics_utils.py        # Physics calculation utilities and constants
-├── requirements.txt        # Python dependencies
-├── config.json            # Application configuration and themes
-├── installer.py           # Automated installation script
-├── run_pyqt5.bat          # Windows launcher script
-├── run_pyqt5.sh           # Linux/macOS launcher script
-├── README.md              # This documentation file
-└── __pycache__/           # Python compiled bytecode (auto-generated)
-```
-
 ## Contributing
 
 This comprehensive physics application is designed for educational and research purposes. The modular architecture allows for easy extension:

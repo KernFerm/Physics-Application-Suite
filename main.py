@@ -1817,6 +1817,1151 @@ STATUS: ✅ Simulation Complete
         
         self.results_text.setPlainText("Ready for simulation...\n\nEnter parameters and click 'Start Simulation'")
 
+class FluidDynamicsWidget(QWidget):
+    """Fluid dynamics simulation widget"""
+    
+    def __init__(self):
+        super().__init__()
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        
+        # Left panel for controls
+        left_panel = QFrame()
+        left_panel.setFixedWidth(320)
+        left_panel.setStyleSheet("""
+            QFrame {
+                background-color: #3c3c3c;
+                border: 1px solid #555555;
+                border-radius: 5px;
+                padding: 10px;
+            }
+        """)
+        left_layout = QVBoxLayout(left_panel)
+        
+        # Title
+        title = QLabel("Fluid Flow Analysis")
+        title.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a9eff;
+                margin-bottom: 10px;
+            }
+        """)
+        left_layout.addWidget(title)
+        
+        # Parameters group
+        params_group = QGroupBox("Fluid Properties")
+        params_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 5px;
+                margin: 10px 0;
+                padding-top: 20px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #4a9eff;
+            }
+        """)
+        params_layout = QFormLayout(params_group)
+        
+        # Input fields
+        self.density_input = QDoubleSpinBox()
+        self.density_input.setRange(0.1, 10000)
+        self.density_input.setValue(1000)  # Water
+        self.density_input.setSuffix(" kg/m³")
+        self.density_input.setStyleSheet(self.get_input_style())
+        
+        self.velocity_input = QDoubleSpinBox()
+        self.velocity_input.setRange(0.01, 100)
+        self.velocity_input.setValue(2.0)
+        self.velocity_input.setSuffix(" m/s")
+        self.velocity_input.setStyleSheet(self.get_input_style())
+        
+        self.viscosity_input = QDoubleSpinBox()
+        self.viscosity_input.setRange(0.001, 10)
+        self.viscosity_input.setValue(0.001)  # Water viscosity
+        self.viscosity_input.setSuffix(" Pa·s")
+        self.viscosity_input.setDecimals(4)
+        self.viscosity_input.setStyleSheet(self.get_input_style())
+        
+        self.diameter_input = QDoubleSpinBox()
+        self.diameter_input.setRange(0.001, 10)
+        self.diameter_input.setValue(0.1)
+        self.diameter_input.setSuffix(" m")
+        self.diameter_input.setStyleSheet(self.get_input_style())
+        
+        params_layout.addRow("Density (ρ):", self.density_input)
+        params_layout.addRow("Velocity (v):", self.velocity_input)
+        params_layout.addRow("Viscosity (μ):", self.viscosity_input)
+        params_layout.addRow("Pipe Diameter (d):", self.diameter_input)
+        
+        left_layout.addWidget(params_group)
+        
+        # Control buttons
+        controls_group = QGroupBox("Analysis")
+        controls_group.setStyleSheet(params_group.styleSheet())
+        controls_layout = QVBoxLayout(controls_group)
+        
+        self.analyze_btn = QPushButton("💧 Analyze Flow")
+        self.analyze_btn.clicked.connect(self.analyze_flow)
+        self.analyze_btn.setStyleSheet(self.get_button_style("#4caf50"))
+        
+        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn.clicked.connect(self.reset_analysis)
+        self.reset_btn.setStyleSheet(self.get_button_style("#ff9800"))
+        
+        controls_layout.addWidget(self.analyze_btn)
+        controls_layout.addWidget(self.reset_btn)
+        
+        left_layout.addWidget(controls_group)
+        
+        # Results display
+        results_group = QGroupBox("Flow Analysis")
+        results_group.setStyleSheet(params_group.styleSheet())
+        results_layout = QVBoxLayout(results_group)
+        
+        self.results_text = QTextEdit()
+        self.results_text.setMaximumHeight(200)
+        self.results_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: white;
+                border: 1px solid #555555;
+                border-radius: 3px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 9pt;
+                padding: 5px;
+            }
+        """)
+        self.results_text.setPlainText("Ready for fluid analysis...\n\nSet parameters and click 'Analyze Flow'")
+        
+        results_layout.addWidget(self.results_text)
+        left_layout.addWidget(results_group)
+        
+        left_layout.addStretch()
+        
+        # Right panel for plot
+        right_panel = QFrame()
+        right_layout = QVBoxLayout(right_panel)
+        
+        # Create matplotlib canvas
+        self.canvas = PhysicsPlotCanvas(self, width=8, height=6, dpi=100)
+        self.canvas.setStyleSheet("""
+            border: 1px solid #555555;
+            border-radius: 5px;
+        """)
+        right_layout.addWidget(self.canvas)
+        
+        # Add panels to main layout
+        layout.addWidget(left_panel)
+        layout.addWidget(right_panel)
+        
+        # Initialize
+        self.reset_analysis()
+    
+    def get_input_style(self):
+        return """
+            QDoubleSpinBox {
+                background-color: #2b2b2b;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 10pt;
+            }
+            QDoubleSpinBox:focus {
+                border-color: #4a9eff;
+            }
+        """
+        
+    def get_button_style(self, color):
+        return f"""
+            QPushButton {{
+                background-color: {color};
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-size: 11pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {color}dd;
+            }}
+            QPushButton:pressed {{
+                background-color: {color}aa;
+            }}
+        """
+    
+    def analyze_flow(self):
+        try:
+            sanitizer = MainApplicationSanitizer()
+            
+            rho = sanitizer.sanitize_numeric_input(self.density_input.value(), allow_zero=False, allow_negative=False)
+            v = sanitizer.sanitize_numeric_input(self.velocity_input.value(), allow_zero=False, allow_negative=False)
+            mu = sanitizer.sanitize_numeric_input(self.viscosity_input.value(), allow_zero=False, allow_negative=False)
+            d = sanitizer.sanitize_numeric_input(self.diameter_input.value(), allow_zero=False, allow_negative=False)
+            
+            # Calculate Reynolds number
+            Re = (rho * v * d) / mu
+            
+            # Determine flow regime
+            if Re < 2300:
+                flow_type = "Laminar"
+                color = 'cyan'
+            elif Re > 4000:
+                flow_type = "Turbulent"
+                color = 'red'
+            else:
+                flow_type = "Transitional"
+                color = 'yellow'
+            
+            # Calculate pressure drop (Darcy-Weisbach equation approximation)
+            if Re < 2300:
+                f = 64 / Re  # Laminar flow
+            else:
+                f = 0.316 / (Re**0.25)  # Turbulent flow approximation
+            
+            length = 1.0  # Assume 1 meter pipe length
+            delta_P = f * (length/d) * (rho * v**2) / 2
+            
+            # Plot velocity profile
+            self.canvas.clear_plot()
+            r = np.linspace(0, d/2, 100)
+            
+            if Re < 2300:  # Laminar
+                # Parabolic velocity profile
+                v_profile = 2 * v * (1 - (r/(d/2))**2)
+            else:  # Turbulent
+                # Power law approximation
+                n = 7  # 1/7 power law
+                v_profile = v * (1 - (r/(d/2)))**(1/n)
+            
+            self.canvas.ax.plot(r*1000, v_profile, color, linewidth=3, label=f'{flow_type} Flow')
+            self.canvas.ax.fill_between(r*1000, 0, v_profile, alpha=0.3, color=color)
+            
+            self.canvas.ax.set_xlabel('Radial Distance from Center (mm)', color='white', fontweight='bold')
+            self.canvas.ax.set_ylabel('Velocity (m/s)', color='white', fontweight='bold')
+            self.canvas.ax.set_title(f'Velocity Profile - Re = {Re:.0f}', color='#4a9eff', fontweight='bold')
+            self.canvas.ax.legend()
+            self.canvas.draw()
+            
+            # Results
+            results = f"""FLUID DYNAMICS ANALYSIS
+{'='*35}
+
+FLUID PROPERTIES:
+• Density: {rho:.1f} kg/m³
+• Velocity: {v:.2f} m/s
+• Viscosity: {mu:.4f} Pa·s
+• Pipe Diameter: {d*1000:.1f} mm
+
+FLOW CHARACTERISTICS:
+• Reynolds Number: {Re:.0f}
+• Flow Regime: {flow_type}
+• Friction Factor: {f:.4f}
+• Pressure Drop: {delta_P:.2f} Pa/m
+
+FLOW REGIME CRITERIA:
+• Laminar: Re < 2,300
+• Transitional: 2,300 < Re < 4,000
+• Turbulent: Re > 4,000
+
+APPLICATIONS:
+• Pipe Flow Design
+• Heat Exchanger Analysis
+• Hydraulic System Design
+
+STATUS: ✅ Analysis Complete"""
+            
+            self.results_text.setPlainText(results)
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Analysis Error", f"Error in fluid analysis:\n{str(e)}")
+    
+    def reset_analysis(self):
+        self.canvas.clear_plot()
+        self.canvas.ax.set_xlabel('Radial Distance (mm)', color='white', fontweight='bold')
+        self.canvas.ax.set_ylabel('Velocity (m/s)', color='white', fontweight='bold')
+        self.canvas.ax.set_title('Fluid Velocity Profile - Ready', color='#4a9eff', fontweight='bold')
+        self.canvas.ax.set_xlim(0, 50)
+        self.canvas.ax.set_ylim(0, 5)
+        self.canvas.draw()
+        
+        self.results_text.setPlainText("Ready for fluid analysis...\n\nSet parameters and click 'Analyze Flow'")
+
+class RelativityWidget(QWidget):
+    """Special and General Relativity widget"""
+    
+    def __init__(self):
+        super().__init__()
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        
+        # Left panel
+        left_panel = QFrame()
+        left_panel.setFixedWidth(320)
+        left_panel.setStyleSheet("""
+            QFrame {
+                background-color: #3c3c3c;
+                border: 1px solid #555555;
+                border-radius: 5px;
+                padding: 10px;
+            }
+        """)
+        left_layout = QVBoxLayout(left_panel)
+        
+        title = QLabel("Relativistic Physics")
+        title.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a9eff;
+                margin-bottom: 10px;
+            }
+        """)
+        left_layout.addWidget(title)
+        
+        # Parameters
+        params_group = QGroupBox("Relativistic Parameters")
+        params_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 5px;
+                margin: 10px 0;
+                padding-top: 20px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #4a9eff;
+            }
+        """)
+        params_layout = QFormLayout(params_group)
+        
+        self.velocity_input = QDoubleSpinBox()
+        self.velocity_input.setRange(0, 99.999)
+        self.velocity_input.setValue(50.0)
+        self.velocity_input.setSuffix("% of c")
+        self.velocity_input.setDecimals(3)
+        self.velocity_input.setStyleSheet(self.get_input_style())
+        
+        self.mass_input = QDoubleSpinBox()
+        self.mass_input.setRange(1e-31, 1000)
+        self.mass_input.setValue(9.109e-31)  # electron mass
+        self.mass_input.setSuffix(" kg")
+        self.mass_input.setDecimals(3)
+        self.mass_input.setStyleSheet(self.get_input_style())
+        
+        params_layout.addRow("Velocity:", self.velocity_input)
+        params_layout.addRow("Rest Mass:", self.mass_input)
+        
+        left_layout.addWidget(params_group)
+        
+        # Controls
+        controls_group = QGroupBox("Calculations")
+        controls_group.setStyleSheet(params_group.styleSheet())
+        controls_layout = QVBoxLayout(controls_group)
+        
+        self.calculate_btn = QPushButton("⚡ Calculate Relativity")
+        self.calculate_btn.clicked.connect(self.calculate_relativity)
+        self.calculate_btn.setStyleSheet(self.get_button_style("#4caf50"))
+        
+        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn.clicked.connect(self.reset_calculation)
+        self.reset_btn.setStyleSheet(self.get_button_style("#ff9800"))
+        
+        controls_layout.addWidget(self.calculate_btn)
+        controls_layout.addWidget(self.reset_btn)
+        left_layout.addWidget(controls_group)
+        
+        # Results
+        results_group = QGroupBox("Relativistic Effects")
+        results_group.setStyleSheet(params_group.styleSheet())
+        results_layout = QVBoxLayout(results_group)
+        
+        self.results_text = QTextEdit()
+        self.results_text.setMaximumHeight(200)
+        self.results_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: white;
+                border: 1px solid #555555;
+                border-radius: 3px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 9pt;
+                padding: 5px;
+            }
+        """)
+        self.results_text.setPlainText("Ready for relativity calculations...")
+        
+        results_layout.addWidget(self.results_text)
+        left_layout.addWidget(results_group)
+        left_layout.addStretch()
+        
+        # Right panel
+        right_panel = QFrame()
+        right_layout = QVBoxLayout(right_panel)
+        
+        self.canvas = PhysicsPlotCanvas(self, width=8, height=6, dpi=100)
+        self.canvas.setStyleSheet("""
+            border: 1px solid #555555;
+            border-radius: 5px;
+        """)
+        right_layout.addWidget(self.canvas)
+        
+        layout.addWidget(left_panel)
+        layout.addWidget(right_panel)
+        
+        self.reset_calculation()
+    
+    def get_input_style(self):
+        return """
+            QDoubleSpinBox {
+                background-color: #2b2b2b;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 10pt;
+            }
+            QDoubleSpinBox:focus {
+                border-color: #4a9eff;
+            }
+        """
+        
+    def get_button_style(self, color):
+        return f"""
+            QPushButton {{
+                background-color: {color};
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-size: 11pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {color}dd;
+            }}
+            QPushButton:pressed {{
+                background-color: {color}aa;
+            }}
+        """
+    
+    def calculate_relativity(self):
+        try:
+            sanitizer = MainApplicationSanitizer()
+            
+            v_percent = sanitizer.sanitize_numeric_input(self.velocity_input.value(), allow_zero=True, allow_negative=False)
+            m0 = sanitizer.sanitize_numeric_input(self.mass_input.value(), allow_zero=False, allow_negative=False)
+            
+            c = 2.99792458e8  # speed of light
+            v = v_percent / 100 * c  # convert to m/s
+            beta = v / c
+            
+            # Lorentz factor
+            if beta < 0.99999:
+                gamma = 1 / math.sqrt(1 - beta**2)
+            else:
+                gamma = 1000  # Very high value for display
+            
+            # Relativistic effects
+            relativistic_mass = gamma * m0
+            length_contraction = 1 / gamma
+            time_dilation = gamma
+            relativistic_energy = gamma * m0 * c**2
+            kinetic_energy = (gamma - 1) * m0 * c**2
+            
+            # Plot gamma vs velocity
+            self.canvas.clear_plot()
+            velocities = np.linspace(0, 99.9, 1000)
+            betas = velocities / 100
+            gammas = 1 / np.sqrt(1 - betas**2)
+            
+            self.canvas.ax.plot(velocities, gammas, 'cyan', linewidth=3, label='Lorentz Factor γ')
+            self.canvas.ax.axvline(v_percent, color='red', linestyle='--', alpha=0.8, 
+                                 label=f'Current: {v_percent:.1f}% c')
+            self.canvas.ax.axhline(gamma, color='red', linestyle='--', alpha=0.8,
+                                 label=f'γ = {gamma:.2f}')
+            
+            self.canvas.ax.set_xlabel('Velocity (% of c)', color='white', fontweight='bold')
+            self.canvas.ax.set_ylabel('Lorentz Factor (γ)', color='white', fontweight='bold')
+            self.canvas.ax.set_title('Special Relativity - Lorentz Factor', color='#4a9eff', fontweight='bold')
+            self.canvas.ax.set_ylim(1, min(gamma * 1.5, 50))
+            self.canvas.ax.legend()
+            self.canvas.draw()
+            
+            # Results
+            results = f"""SPECIAL RELATIVITY ANALYSIS
+{'='*40}
+
+INPUT PARAMETERS:
+• Velocity: {v_percent:.3f}% of c ({v:.2e} m/s)
+• Rest Mass: {m0:.3e} kg
+• Speed of Light: {c:.3e} m/s
+
+RELATIVISTIC EFFECTS:
+• Lorentz Factor (γ): {gamma:.4f}
+• Relativistic Mass: {relativistic_mass:.3e} kg
+• Length Contraction: {length_contraction:.4f}
+• Time Dilation Factor: {time_dilation:.4f}
+
+ENERGY CALCULATIONS:
+• Rest Energy (E₀): {m0 * c**2:.3e} J
+• Total Energy (E): {relativistic_energy:.3e} J
+• Kinetic Energy (K): {kinetic_energy:.3e} J
+
+CLASSICAL vs RELATIVISTIC:
+• Classical KE: {0.5 * m0 * v**2:.3e} J
+• Relativistic KE: {kinetic_energy:.3e} J
+• Difference: {((kinetic_energy - 0.5 * m0 * v**2) / kinetic_energy * 100):.1f}%
+
+SIGNIFICANCE:
+• {'Significant' if gamma > 1.1 else 'Minimal'} relativistic effects
+• Time runs {'slower' if gamma > 1.1 else 'normally'} for moving observer
+• Length {'contracts' if gamma > 1.1 else 'unchanged'} in direction of motion
+
+STATUS: ✅ Relativity Analysis Complete"""
+            
+            self.results_text.setPlainText(results)
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Calculation Error", f"Error in relativity calculation:\n{str(e)}")
+    
+    def reset_calculation(self):
+        self.canvas.clear_plot()
+        velocities = np.linspace(0, 99, 100)
+        betas = velocities / 100
+        gammas = 1 / np.sqrt(1 - betas**2)
+        
+        self.canvas.ax.plot(velocities, gammas, 'cyan', linewidth=2, alpha=0.5, label='γ = 1/√(1-β²)')
+        self.canvas.ax.set_xlabel('Velocity (% of c)', color='white', fontweight='bold')
+        self.canvas.ax.set_ylabel('Lorentz Factor (γ)', color='white', fontweight='bold')
+        self.canvas.ax.set_title('Special Relativity - Ready', color='#4a9eff', fontweight='bold')
+        self.canvas.ax.set_ylim(1, 10)
+        self.canvas.ax.legend()
+        self.canvas.draw()
+        
+        self.results_text.setPlainText("Ready for relativity calculations...\n\nSet velocity and mass parameters")
+
+class NuclearPhysicsWidget(QWidget):
+    """Nuclear physics simulation widget"""
+    
+    def __init__(self):
+        super().__init__()
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        
+        # Left panel
+        left_panel = QFrame()
+        left_panel.setFixedWidth(320)
+        left_panel.setStyleSheet("""
+            QFrame {
+                background-color: #3c3c3c;
+                border: 1px solid #555555;
+                border-radius: 5px;
+                padding: 10px;
+            }
+        """)
+        left_layout = QVBoxLayout(left_panel)
+        
+        title = QLabel("Nuclear Decay & Binding")
+        title.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a9eff;
+                margin-bottom: 10px;
+            }
+        """)
+        left_layout.addWidget(title)
+        
+        # Parameters
+        params_group = QGroupBox("Nuclear Parameters")
+        params_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 5px;
+                margin: 10px 0;
+                padding-top: 20px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #4a9eff;
+            }
+        """)
+        params_layout = QFormLayout(params_group)
+        
+        self.atomic_number = QSpinBox()
+        self.atomic_number.setRange(1, 118)
+        self.atomic_number.setValue(92)  # Uranium
+        self.atomic_number.setStyleSheet(self.get_input_style())
+        
+        self.mass_number = QSpinBox()
+        self.mass_number.setRange(1, 300)
+        self.mass_number.setValue(238)  # U-238
+        self.mass_number.setStyleSheet(self.get_input_style())
+        
+        self.half_life = QDoubleSpinBox()
+        self.half_life.setRange(1e-10, 1e15)
+        self.half_life.setValue(4.468e9)  # U-238 half-life in years
+        self.half_life.setSuffix(" years")
+        self.half_life.setDecimals(3)
+        self.half_life.setStyleSheet(self.get_input_style())
+        
+        self.initial_amount = QDoubleSpinBox()
+        self.initial_amount.setRange(1e-15, 1000)
+        self.initial_amount.setValue(1.0)
+        self.initial_amount.setSuffix(" g")
+        self.initial_amount.setStyleSheet(self.get_input_style())
+        
+        params_layout.addRow("Atomic Number (Z):", self.atomic_number)
+        params_layout.addRow("Mass Number (A):", self.mass_number)
+        params_layout.addRow("Half-life:", self.half_life)
+        params_layout.addRow("Initial Amount:", self.initial_amount)
+        
+        left_layout.addWidget(params_group)
+        
+        # Controls
+        controls_group = QGroupBox("Analysis")
+        controls_group.setStyleSheet(params_group.styleSheet())
+        controls_layout = QVBoxLayout(controls_group)
+        
+        self.analyze_btn = QPushButton("☢️ Analyze Nucleus")
+        self.analyze_btn.clicked.connect(self.analyze_nucleus)
+        self.analyze_btn.setStyleSheet(self.get_button_style("#4caf50"))
+        
+        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn.clicked.connect(self.reset_analysis)
+        self.reset_btn.setStyleSheet(self.get_button_style("#ff9800"))
+        
+        controls_layout.addWidget(self.analyze_btn)
+        controls_layout.addWidget(self.reset_btn)
+        left_layout.addWidget(controls_group)
+        
+        # Results
+        results_group = QGroupBox("Nuclear Analysis")
+        results_group.setStyleSheet(params_group.styleSheet())
+        results_layout = QVBoxLayout(results_group)
+        
+        self.results_text = QTextEdit()
+        self.results_text.setMaximumHeight(200)
+        self.results_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: white;
+                border: 1px solid #555555;
+                border-radius: 3px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 9pt;
+                padding: 5px;
+            }
+        """)
+        self.results_text.setPlainText("Ready for nuclear analysis...")
+        
+        results_layout.addWidget(self.results_text)
+        left_layout.addWidget(results_group)
+        left_layout.addStretch()
+        
+        # Right panel
+        right_panel = QFrame()
+        right_layout = QVBoxLayout(right_panel)
+        
+        self.canvas = PhysicsPlotCanvas(self, width=8, height=6, dpi=100)
+        self.canvas.setStyleSheet("""
+            border: 1px solid #555555;
+            border-radius: 5px;
+        """)
+        right_layout.addWidget(self.canvas)
+        
+        layout.addWidget(left_panel)
+        layout.addWidget(right_panel)
+        
+        self.reset_analysis()
+    
+    def get_input_style(self):
+        return """
+            QSpinBox, QDoubleSpinBox {
+                background-color: #2b2b2b;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 10pt;
+            }
+            QSpinBox:focus, QDoubleSpinBox:focus {
+                border-color: #4a9eff;
+            }
+        """
+        
+    def get_button_style(self, color):
+        return f"""
+            QPushButton {{
+                background-color: {color};
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-size: 11pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {color}dd;
+            }}
+            QPushButton:pressed {{
+                background-color: {color}aa;
+            }}
+        """
+    
+    def analyze_nucleus(self):
+        try:
+            sanitizer = MainApplicationSanitizer()
+            
+            Z = int(sanitizer.sanitize_numeric_input(self.atomic_number.value(), allow_zero=False, allow_negative=False))
+            A = int(sanitizer.sanitize_numeric_input(self.mass_number.value(), allow_zero=False, allow_negative=False))
+            t_half = sanitizer.sanitize_numeric_input(self.half_life.value(), allow_zero=False, allow_negative=False)
+            N0 = sanitizer.sanitize_numeric_input(self.initial_amount.value(), allow_zero=False, allow_negative=False)
+            
+            N = A - Z  # Number of neutrons
+            
+            # Nuclear properties
+            atomic_mass_unit = 931.494  # MeV/c²
+            
+            # Approximate binding energy (semi-empirical mass formula)
+            # Simplified version for educational purposes
+            a_v = 15.75  # Volume term
+            a_s = -17.8  # Surface term
+            a_c = -0.711  # Coulomb term
+            a_a = -23.7   # Asymmetry term
+            
+            binding_energy = (a_v * A + 
+                            a_s * A**(2/3) + 
+                            a_c * Z**2 / A**(1/3) + 
+                            a_a * (N - Z)**2 / A)
+            
+            binding_energy_per_nucleon = binding_energy / A
+            
+            # Decay constant
+            decay_constant = 0.693147 / (t_half * 365.25 * 24 * 3600)  # per second
+            
+            # Activity
+            avogadro = 6.022e23
+            initial_nuclei = (N0 * 1e-3 / A) * avogadro  # Convert g to number of nuclei
+            activity = decay_constant * initial_nuclei  # Becquerels
+            
+            # Plot decay curve
+            self.canvas.clear_plot()
+            time_years = np.linspace(0, 5 * t_half, 1000)
+            time_seconds = time_years * 365.25 * 24 * 3600
+            amount_remaining = N0 * np.exp(-decay_constant * time_seconds)
+            
+            self.canvas.ax.plot(time_years/1e6, amount_remaining, 'lime', linewidth=3, label='Decay Curve')
+            self.canvas.ax.axhline(N0/2, color='red', linestyle='--', alpha=0.7, label='Half-life')
+            self.canvas.ax.axvline(t_half/1e6, color='red', linestyle='--', alpha=0.7)
+            
+            self.canvas.ax.set_xlabel('Time (Million Years)', color='white', fontweight='bold')
+            self.canvas.ax.set_ylabel('Amount Remaining (g)', color='white', fontweight='bold')
+            self.canvas.ax.set_title(f'Nuclear Decay - {self.get_element_name(Z)}-{A}', color='#4a9eff', fontweight='bold')
+            self.canvas.ax.legend()
+            self.canvas.ax.set_yscale('log')
+            self.canvas.draw()
+            
+            # Results
+            results = f"""NUCLEAR PHYSICS ANALYSIS
+{'='*40}
+
+NUCLEUS: {self.get_element_name(Z)}-{A}
+• Atomic Number (Z): {Z}
+• Mass Number (A): {A}
+• Neutrons (N): {N}
+• N/Z Ratio: {N/Z:.3f}
+
+BINDING ENERGY:
+• Total: {binding_energy:.2f} MeV
+• Per Nucleon: {binding_energy_per_nucleon:.2f} MeV/nucleon
+• Stability: {'High' if binding_energy_per_nucleon > 8 else 'Moderate' if binding_energy_per_nucleon > 7 else 'Low'}
+
+RADIOACTIVE DECAY:
+• Half-life: {t_half:.3e} years
+• Decay Constant: {decay_constant:.3e} s⁻¹
+• Initial Activity: {activity:.3e} Bq
+• Initial Nuclei: {initial_nuclei:.3e}
+
+DECAY CHARACTERISTICS:
+• After 1 half-life: {N0/2:.3f} g remains
+• After 2 half-lives: {N0/4:.3f} g remains
+• After 10 half-lives: {N0/1024:.6f} g remains
+
+NUCLEAR TYPE:
+• {'Alpha emitter' if Z > 83 else 'Beta emitter' if N > Z else 'Stable or EC'}
+• Magic numbers: {'Yes' if Z in [2,8,20,28,50,82] or N in [2,8,20,28,50,82,126] else 'No'}
+
+STATUS: ✅ Nuclear Analysis Complete"""
+            
+            self.results_text.setPlainText(results)
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Analysis Error", f"Error in nuclear analysis:\n{str(e)}")
+    
+    def get_element_name(self, atomic_number):
+        elements = {
+            1: 'H', 2: 'He', 3: 'Li', 4: 'Be', 5: 'B', 6: 'C', 7: 'N', 8: 'O', 9: 'F', 10: 'Ne',
+            11: 'Na', 12: 'Mg', 13: 'Al', 14: 'Si', 15: 'P', 16: 'S', 17: 'Cl', 18: 'Ar', 19: 'K', 20: 'Ca',
+            26: 'Fe', 29: 'Cu', 47: 'Ag', 79: 'Au', 82: 'Pb', 92: 'U', 94: 'Pu'
+        }
+        return elements.get(atomic_number, f'Element{atomic_number}')
+    
+    def reset_analysis(self):
+        self.canvas.clear_plot()
+        self.canvas.ax.set_xlabel('Time (Million Years)', color='white', fontweight='bold')
+        self.canvas.ax.set_ylabel('Amount Remaining (g)', color='white', fontweight='bold')
+        self.canvas.ax.set_title('Nuclear Decay - Ready', color='#4a9eff', fontweight='bold')
+        self.canvas.ax.set_xlim(0, 20)
+        self.canvas.ax.set_ylim(0.001, 1)
+        self.canvas.ax.set_yscale('log')
+        self.canvas.draw()
+        
+        self.results_text.setPlainText("Ready for nuclear analysis...\n\nSet nuclear parameters and click 'Analyze'")
+
+class AstrophysicsWidget(QWidget):
+    """Astrophysics simulation widget"""
+    
+    def __init__(self):
+        super().__init__()
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        
+        # Left panel
+        left_panel = QFrame()
+        left_panel.setFixedWidth(320)
+        left_panel.setStyleSheet("""
+            QFrame {
+                background-color: #3c3c3c;
+                border: 1px solid #555555;
+                border-radius: 5px;
+                padding: 10px;
+            }
+        """)
+        left_layout = QVBoxLayout(left_panel)
+        
+        title = QLabel("Stellar & Orbital Mechanics")
+        title.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #4a9eff;
+                margin-bottom: 10px;
+            }
+        """)
+        left_layout.addWidget(title)
+        
+        # Parameters
+        params_group = QGroupBox("Celestial Parameters")
+        params_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 5px;
+                margin: 10px 0;
+                padding-top: 20px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+                color: #4a9eff;
+            }
+        """)
+        params_layout = QFormLayout(params_group)
+        
+        self.mass_input = QDoubleSpinBox()
+        self.mass_input.setRange(1e20, 1e35)
+        self.mass_input.setValue(1.989e30)  # Solar mass
+        self.mass_input.setSuffix(" kg")
+        self.mass_input.setDecimals(3)
+        self.mass_input.setStyleSheet(self.get_input_style())
+        
+        self.radius_input = QDoubleSpinBox()
+        self.radius_input.setRange(1e3, 1e12)
+        self.radius_input.setValue(6.96e8)  # Solar radius
+        self.radius_input.setSuffix(" m")
+        self.radius_input.setDecimals(2)
+        self.radius_input.setStyleSheet(self.get_input_style())
+        
+        self.temperature_input = QDoubleSpinBox()
+        self.temperature_input.setRange(1000, 100000)
+        self.temperature_input.setValue(5778)  # Solar temperature
+        self.temperature_input.setSuffix(" K")
+        self.temperature_input.setStyleSheet(self.get_input_style())
+        
+        self.orbital_radius = QDoubleSpinBox()
+        self.orbital_radius.setRange(1e9, 1e15)
+        self.orbital_radius.setValue(1.496e11)  # Earth orbital radius
+        self.orbital_radius.setSuffix(" m")
+        self.orbital_radius.setDecimals(3)
+        self.orbital_radius.setStyleSheet(self.get_input_style())
+        
+        params_layout.addRow("Star Mass:", self.mass_input)
+        params_layout.addRow("Star Radius:", self.radius_input)
+        params_layout.addRow("Star Temperature:", self.temperature_input)
+        params_layout.addRow("Orbital Radius:", self.orbital_radius)
+        
+        left_layout.addWidget(params_group)
+        
+        # Controls
+        controls_group = QGroupBox("Calculations")
+        controls_group.setStyleSheet(params_group.styleSheet())
+        controls_layout = QVBoxLayout(controls_group)
+        
+        self.analyze_btn = QPushButton("🌟 Analyze System")
+        self.analyze_btn.clicked.connect(self.analyze_system)
+        self.analyze_btn.setStyleSheet(self.get_button_style("#4caf50"))
+        
+        self.reset_btn = QPushButton("🔄 Reset")
+        self.reset_btn.clicked.connect(self.reset_analysis)
+        self.reset_btn.setStyleSheet(self.get_button_style("#ff9800"))
+        
+        controls_layout.addWidget(self.analyze_btn)
+        controls_layout.addWidget(self.reset_btn)
+        left_layout.addWidget(controls_group)
+        
+        # Results
+        results_group = QGroupBox("Astrophysics Results")
+        results_group.setStyleSheet(params_group.styleSheet())
+        results_layout = QVBoxLayout(results_group)
+        
+        self.results_text = QTextEdit()
+        self.results_text.setMaximumHeight(200)
+        self.results_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #2b2b2b;
+                color: white;
+                border: 1px solid #555555;
+                border-radius: 3px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 9pt;
+                padding: 5px;
+            }
+        """)
+        self.results_text.setPlainText("Ready for stellar analysis...")
+        
+        results_layout.addWidget(self.results_text)
+        left_layout.addWidget(results_group)
+        left_layout.addStretch()
+        
+        # Right panel
+        right_panel = QFrame()
+        right_layout = QVBoxLayout(right_panel)
+        
+        self.canvas = PhysicsPlotCanvas(self, width=8, height=6, dpi=100)
+        self.canvas.setStyleSheet("""
+            border: 1px solid #555555;
+            border-radius: 5px;
+        """)
+        right_layout.addWidget(self.canvas)
+        
+        layout.addWidget(left_panel)
+        layout.addWidget(right_panel)
+        
+        self.reset_analysis()
+    
+    def get_input_style(self):
+        return """
+            QDoubleSpinBox {
+                background-color: #2b2b2b;
+                color: white;
+                border: 2px solid #555555;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 10pt;
+            }
+            QDoubleSpinBox:focus {
+                border-color: #4a9eff;
+            }
+        """
+        
+    def get_button_style(self, color):
+        return f"""
+            QPushButton {{
+                background-color: {color};
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-size: 11pt;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {color}dd;
+            }}
+            QPushButton:pressed {{
+                background-color: {color}aa;
+            }}
+        """
+    
+    def analyze_system(self):
+        try:
+            sanitizer = MainApplicationSanitizer()
+            
+            M = sanitizer.sanitize_numeric_input(self.mass_input.value(), allow_zero=False, allow_negative=False)
+            R = sanitizer.sanitize_numeric_input(self.radius_input.value(), allow_zero=False, allow_negative=False)
+            T = sanitizer.sanitize_numeric_input(self.temperature_input.value(), allow_zero=False, allow_negative=False)
+            r = sanitizer.sanitize_numeric_input(self.orbital_radius.value(), allow_zero=False, allow_negative=False)
+            
+            # Physical constants
+            G = 6.67430e-11  # Gravitational constant
+            c = 2.99792458e8  # Speed of light
+            sigma = 5.670374419e-8  # Stefan-Boltzmann constant
+            Wien_b = 2.897771955e-3  # Wien's displacement constant
+            
+            # Stellar properties
+            surface_gravity = G * M / R**2
+            escape_velocity = math.sqrt(2 * G * M / R)
+            schwarzschild_radius = 2 * G * M / c**2
+            
+            # Luminosity (Stefan-Boltzmann law)
+            surface_area = 4 * math.pi * R**2
+            luminosity = sigma * surface_area * T**4
+            
+            # Wien's law
+            peak_wavelength = Wien_b / T
+            
+            # Orbital mechanics
+            orbital_velocity = math.sqrt(G * M / r)
+            orbital_period = 2 * math.pi * math.sqrt(r**3 / (G * M))
+            
+            # Convert units for display
+            period_days = orbital_period / (24 * 3600)
+            period_years = orbital_period / (365.25 * 24 * 3600)
+            
+            # Plot blackbody spectrum
+            self.canvas.clear_plot()
+            wavelengths = np.linspace(100e-9, 3000e-9, 1000)  # 100 nm to 3000 nm
+            
+            # Planck's law
+            h = 6.62607015e-34
+            k_B = 1.380649e-23
+            
+            intensity = (2 * h * c**2 / wavelengths**5) / (np.exp(h * c / (wavelengths * k_B * T)) - 1)
+            
+            # Normalize for plotting
+            intensity = intensity / np.max(intensity)
+            
+            self.canvas.ax.plot(wavelengths * 1e9, intensity, 'yellow', linewidth=3, label=f'T = {T:.0f} K')
+            self.canvas.ax.axvline(peak_wavelength * 1e9, color='red', linestyle='--', 
+                                 label=f'Peak: {peak_wavelength*1e9:.0f} nm')
+            
+            self.canvas.ax.set_xlabel('Wavelength (nm)', color='white', fontweight='bold')
+            self.canvas.ax.set_ylabel('Normalized Intensity', color='white', fontweight='bold')
+            self.canvas.ax.set_title('Stellar Blackbody Spectrum', color='#4a9eff', fontweight='bold')
+            self.canvas.ax.legend()
+            self.canvas.draw()
+            
+            # Stellar classification
+            if T > 30000:
+                stellar_class = 'O (Blue)'
+            elif T > 10000:
+                stellar_class = 'B (Blue-white)'
+            elif T > 7500:
+                stellar_class = 'A (White)'
+            elif T > 6000:
+                stellar_class = 'F (Yellow-white)'
+            elif T > 5200:
+                stellar_class = 'G (Yellow)'
+            elif T > 3700:
+                stellar_class = 'K (Orange)'
+            else:
+                stellar_class = 'M (Red)'
+            
+            # Results
+            results = f"""ASTROPHYSICS ANALYSIS
+{'='*40}
+
+STELLAR PROPERTIES:
+• Mass: {M:.3e} kg ({M/1.989e30:.2f} M☉)
+• Radius: {R:.3e} m ({R/6.96e8:.2f} R☉)
+• Temperature: {T:.0f} K
+• Spectral Class: {stellar_class}
+
+STELLAR MECHANICS:
+• Surface Gravity: {surface_gravity:.2f} m/s²
+• Escape Velocity: {escape_velocity/1000:.0f} km/s
+• Schwarzschild Radius: {schwarzschild_radius:.0f} m
+
+RADIATION PROPERTIES:
+• Luminosity: {luminosity:.3e} W ({luminosity/3.828e26:.2f} L☉)
+• Peak Wavelength: {peak_wavelength*1e9:.0f} nm
+• Color: {'Blue' if peak_wavelength < 450e-9 else 'Green' if peak_wavelength < 550e-9 else 'Red'}
+
+ORBITAL DYNAMICS:
+• Orbital Radius: {r:.3e} m ({r/1.496e11:.2f} AU)
+• Orbital Velocity: {orbital_velocity/1000:.2f} km/s
+• Orbital Period: {period_days:.1f} days ({period_years:.2f} years)
+
+HABITABILITY:
+• Habitable Zone: {math.sqrt(luminosity/3.828e26) * 1.496e11:.2e} m
+• Planet in HZ: {'Yes' if abs(r - math.sqrt(luminosity/3.828e26) * 1.496e11) < 0.5*1.496e11 else 'No'}
+
+STELLAR EVOLUTION:
+• Main Sequence: {'Yes' if 0.1 < M/1.989e30 < 100 else 'No'}
+• Lifetime: ~{(M/1.989e30)**-2.5 * 10:.1f} billion years
+
+STATUS: ✅ Astrophysics Analysis Complete"""
+            
+            self.results_text.setPlainText(results)
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Analysis Error", f"Error in astrophysics analysis:\n{str(e)}")
+    
+    def reset_analysis(self):
+        self.canvas.clear_plot()
+        
+        # Show example blackbody curves
+        wavelengths = np.linspace(100e-9, 3000e-9, 500)
+        temps = [3000, 5778, 10000]
+        colors = ['red', 'yellow', 'cyan']
+        labels = ['M-type', 'G-type (Sun)', 'B-type']
+        
+        h = 6.62607015e-34
+        c = 2.99792458e8
+        k_B = 1.380649e-23
+        
+        for T, color, label in zip(temps, colors, labels):
+            intensity = (2 * h * c**2 / wavelengths**5) / (np.exp(h * c / (wavelengths * k_B * T)) - 1)
+            intensity = intensity / np.max(intensity)
+            self.canvas.ax.plot(wavelengths * 1e9, intensity, color=color, alpha=0.7, label=label)
+        
+        self.canvas.ax.set_xlabel('Wavelength (nm)', color='white', fontweight='bold')
+        self.canvas.ax.set_ylabel('Normalized Intensity', color='white', fontweight='bold')
+        self.canvas.ax.set_title('Stellar Spectra - Ready', color='#4a9eff', fontweight='bold')
+        self.canvas.ax.legend()
+        self.canvas.draw()
+        
+        self.results_text.setPlainText("Ready for stellar analysis...\n\nSet stellar parameters and click 'Analyze'")
+
 class AboutDialog(QDialog):
     """About dialog with application information"""
     
@@ -2043,6 +3188,19 @@ class PhysicsApplication(QMainWindow):
         
         self.quantum_widget = QuantumWidget()
         self.tab_widget.addTab(self.quantum_widget, "🔬 Quantum Physics")
+        
+        # Add new advanced physics modules
+        self.fluid_widget = FluidDynamicsWidget()
+        self.tab_widget.addTab(self.fluid_widget, "💧 Fluid Dynamics")
+        
+        self.relativity_widget = RelativityWidget()
+        self.tab_widget.addTab(self.relativity_widget, "⚡ Relativity")
+        
+        self.nuclear_widget = NuclearPhysicsWidget()
+        self.tab_widget.addTab(self.nuclear_widget, "☢️ Nuclear Physics")
+        
+        self.astro_widget = AstrophysicsWidget()
+        self.tab_widget.addTab(self.astro_widget, "🌟 Astrophysics")
         
         main_layout.addWidget(self.tab_widget)
         
@@ -2400,7 +3558,17 @@ class PhysicsApplication(QMainWindow):
             "Frequency (f = c/λ)",
             "Photon Energy (E = hf)",
             "Electric Field (E = kq/r²)",
-            "Magnetic Force (F = qvB)"
+            "Magnetic Force (F = qvB)",
+            "Fluid Pressure (P = ρgh)",
+            "Reynolds Number (Re = ρvl/μ)",
+            "Lorentz Factor (γ = 1/√(1-v²/c²))",
+            "Relativistic Energy (E = γmc²)",
+            "Nuclear Binding Energy",
+            "Schwarzschild Radius (rs = 2GM/c²)",
+            "Escape Velocity (v = √(2GM/r))",
+            "Orbital Period (T = 2π√(r³/GM))",
+            "Wien's Law (λmax = b/T)",
+            "Stefan-Boltzmann (P = σAT⁴)"
         ])
         self.calc_type_combo.setStyleSheet(self.get_input_style())
         calc_type_layout.addWidget(self.calc_type_combo, 0, 0, 1, 2)
@@ -2652,7 +3820,10 @@ class PhysicsApplication(QMainWindow):
         unit_type_combo = QComboBox()
         unit_type_combo.addItems([
             "Length", "Mass", "Time", "Energy", "Power", 
-            "Force", "Pressure", "Temperature", "Frequency"
+            "Force", "Pressure", "Temperature", "Frequency",
+            "Velocity", "Acceleration", "Density", "Volume",
+            "Electric Current", "Voltage", "Resistance", "Capacitance",
+            "Magnetic Field", "Luminosity", "Radioactivity", "Angle"
         ])
         unit_type_combo.setStyleSheet(self.get_input_style())
         type_layout.addWidget(unit_type_combo)
@@ -2926,7 +4097,7 @@ def main():
     """Main application entry point"""
     app = QApplication(sys.argv)
     app.setApplicationName("Physics Application Suite")
-    app.setApplicationVersion("2.0")
+    app.setApplicationVersion("2.0.2")
     app.setOrganizationName("Physics Suite")
     
     # Set application icon if available

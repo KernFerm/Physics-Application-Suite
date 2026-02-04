@@ -1,3 +1,17 @@
+[![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](https://github.com/physics-application-suite)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![PyQt5](https://img.shields.io/badge/PyQt5-5.15+-green.svg)](https://pypi.org/project/PyQt5/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/physics-application-suite)
+[![Education](https://img.shields.io/badge/purpose-Educational-brightgreen.svg)](https://github.com/physics-application-suite)
+
+[![Matplotlib](https://img.shields.io/badge/matplotlib-orange.svg)](https://matplotlib.org/)
+[![NumPy](https://img.shields.io/badge/numpy-red.svg)](https://numpy.org/)
+[![Status](https://img.shields.io/badge/status-Active-success.svg)](https://github.com/physics-application-suite)
+[![Physics Modules](https://img.shields.io/badge/physics%20modules-9-brightgreen.svg)](https://github.com/physics-application-suite)
+[![Calculator Types](https://img.shields.io/badge/calculator%20types-19-blue.svg)](https://github.com/physics-application-suite)
+[![Unit Categories](https://img.shields.io/badge/unit%20categories-21-purple.svg)](https://github.com/physics-application-suite)
+
 # Physics Application Suite
 
 A comprehensive physics simulation and calculation tool built with PyQt5, featuring a modern Linux-style GUI with real experimental data integration and advanced visualizations.

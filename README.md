@@ -1,7 +1,7 @@
 [![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)](https://github.com/physics-application-suite)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![PyQt5](https://img.shields.io/badge/PyQt5-5.15+-green.svg)](https://pypi.org/project/PyQt5/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/physics-application-suite)
 [![Education](https://img.shields.io/badge/purpose-Educational-brightgreen.svg)](https://github.com/physics-application-suite)
 

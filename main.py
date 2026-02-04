@@ -3001,7 +3001,7 @@ class AboutDialog(QDialog):
         """)
         
         about_content = """
-Physics Application Suite v2.0
+Physics Application Suite v2.0.2
 
 A comprehensive physics simulation and calculation tool featuring
 advanced PyQt5 interface and interactive visualizations.
@@ -3054,7 +3054,7 @@ class PhysicsApplication(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Physics Application Suite v2.0 - PyQt5")
+        self.setWindowTitle("Physics Application Suite v2.0.2 - Advanced Physics Tools")
         self.setGeometry(100, 100, 1400, 900)
         self.setMinimumSize(1000, 700)
         

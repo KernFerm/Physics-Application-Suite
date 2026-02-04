@@ -77,10 +77,10 @@ python installer.py
 ## Dependencies
 
 The application requires the following Python packages:
-- `PyQt5 >= 5.15.0` - Modern GUI framework with native look and feel
-- `matplotlib >= 3.5.0` - Scientific plotting and visualization with Qt5Agg backend
-- `numpy >= 1.21.0` - Numerical calculations and array operations
-- `pillow >= 8.3.0` - Image processing and format support
+- `PyQt5` - Modern GUI framework with native look and feel
+- `matplotlib` - Scientific plotting and visualization with Qt5Agg backend
+- `numpy` - Numerical calculations and array operations
+- `pillow` - Image processing and format support
 
 ## Usage Guide
 

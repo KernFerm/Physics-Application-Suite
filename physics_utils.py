@@ -16,8 +16,8 @@ Features:
 - Security checks for all operations including extreme value physics
 - Specialized constants and utilities for advanced physics modules
 
-Author: Physics Application Suite Team
-Version: 2.1.0
+Author: BubblesTheDev
+Version: 2.0.2
 Date: February 2026
 """
 

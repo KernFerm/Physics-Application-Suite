@@ -1,8 +1,8 @@
 {
   "application": {
     "title": "Physics Application Suite",
-    "version": "2.0.0",
-    "description": "Comprehensive physics simulation with real experimental data integration",
+    "version": "2.0.2",
+    "description": "Comprehensive physics simulation with real experimental data integration - 9 physics modules including advanced topics",
     "window": {
       "width": 1200,
       "height": 800,
@@ -50,6 +50,31 @@
       "figsize": [8, 6],
       "gridAlpha": 0.3,
       "lineWidth": 2
+    },
+    "calculator": {
+      "calculationTypes": 19,
+      "categories": [
+        "mechanics", "electromagnetism", "thermodynamics", "quantum_physics", 
+        "waves_optics", "fluid_dynamics", "relativity", "nuclear_physics", "astrophysics"
+      ]
+    },
+    "unitConverter": {
+      "unitCategories": 21,
+      "categories": [
+        "Length", "Mass", "Time", "Energy", "Power", "Force", "Pressure", 
+        "Temperature", "Electric Current", "Voltage", "Resistance", 
+        "Magnetic Field", "Frequency", "Heat Capacity", "Entropy",
+        "Activity", "Absorbed Dose", "Equivalent Dose", "Luminosity", 
+        "Astronomical Distance", "Wavelength"
+      ]
+    },
+    "physicsModules": {
+      "enabled": [
+        "classical_mechanics", "electromagnetism", "thermodynamics",
+        "quantum_physics", "wave_optics", "fluid_dynamics", 
+        "relativity", "nuclear_physics", "astrophysics"
+      ],
+      "advanced": ["fluid_dynamics", "relativity", "nuclear_physics", "astrophysics"]
     }
   },
   "features": {
@@ -58,6 +83,9 @@
     "animations": true,
     "tooltips": true,
     "statusUpdates": true,
-    "timeDisplay": true
+    "timeDisplay": true,
+    "advancedPhysics": true,
+    "expandedCalculator": true,
+    "extendedUnitConverter": true
   }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Physics Application Installer and Launcher v2.0
+Physics Application Installer and Launcher v2.0.2
 Handles dependencies, security checks, and launches the application safely
 
 Features:

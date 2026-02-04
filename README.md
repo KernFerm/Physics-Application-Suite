@@ -61,16 +61,16 @@ A comprehensive physics simulation and calculation tool built with PyQt5, featur
 #### Windows
 ```bash
 # Double-click run_pyqt5.bat or open command prompt and run:
-.\run_pyqt5.bat
+.\run.bat
 ```
 
 #### Linux/macOS
 ```bash
 # Make the script executable
-chmod +x run_pyqt5.sh
+chmod +x run.sh
 
 # Run the application
-./run_pyqt5.sh
+./run.sh
 ```
 
 #### Manual Installation

@@ -1,0 +1,63 @@
+{
+  "application": {
+    "title": "Physics Application Suite",
+    "version": "2.0.0",
+    "description": "Comprehensive physics simulation with real experimental data integration",
+    "window": {
+      "width": 1200,
+      "height": 800,
+      "minWidth": 800,
+      "minHeight": 600,
+      "centered": true
+    }
+  },
+  "theme": {
+    "colors": {
+      "background": "#2b2b2b",
+      "foreground": "#ffffff",
+      "accent": "#4a9eff",
+      "hover": "#5ba0ff",
+      "panel": "#3c3c3c",
+      "border": "#555555",
+      "success": "#4caf50",
+      "warning": "#ff9800",
+      "error": "#f44336"
+    },
+    "fonts": {
+      "main": ["Arial", 10],
+      "heading": ["Arial", 12, "bold"],
+      "console": ["Consolas", 9],
+      "formula": ["Consolas", 10]
+    }
+  },
+  "physics": {
+    "mechanics": {
+      "defaultValues": {
+        "velocity": 20,
+        "angle": 45,
+        "height": 0,
+        "gravity": 9.81
+      },
+      "limits": {
+        "velocityMax": 1000,
+        "angleMax": 90,
+        "heightMax": 1000,
+        "gravityMax": 50
+      }
+    },
+    "plotting": {
+      "dpi": 100,
+      "figsize": [8, 6],
+      "gridAlpha": 0.3,
+      "lineWidth": 2
+    }
+  },
+  "features": {
+    "autoSave": false,
+    "autoExport": false,
+    "animations": true,
+    "tooltips": true,
+    "statusUpdates": true,
+    "timeDisplay": true
+  }
+}

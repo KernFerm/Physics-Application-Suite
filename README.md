@@ -191,7 +191,7 @@ The application requires the following Python packages:
 
 ## Contributing
 
-This comprehensive physics application is designed for educational and research purposes. The modular architecture allows for easy extension:
+- > This comprehensive physics application is designed for educational and research purposes. The modular architecture allows for easy extension:
 
 ### Adding New Physics Modules
 1. Create a new widget class inheriting from `QWidget`
@@ -207,7 +207,7 @@ This comprehensive physics application is designed for educational and research 
 
 ## License
 
-This project is designed as an educational tool for physics simulation and calculation. It integrates real experimental data from various published sources for educational purposes.
+- > This project is designed as an educational tool for physics simulation and calculation. It integrates real experimental data from various published sources for educational purposes.
 
 ## Support & Troubleshooting
 
@@ -223,22 +223,6 @@ This project is designed as an educational tool for physics simulation and calcu
 3. Use the keyboard shortcuts reference for efficient navigation
 4. Consult the physics utilities documentation for calculation details
 
-## Version History
-
-- **v2.0**: Major PyQt5 upgrade with real experimental data integration
-  - Migrated from tkinter to PyQt5 for professional GUI
-  - Integrated authentic experimental data across all physics modules  
-  - Enhanced visualization with professional matplotlib plots
-  - Added comprehensive project management and data export
-  - Implemented advanced calculator and unit conversion tools
-  - Added full keyboard shortcut support and accessibility features
-
-- **v1.0**: Initial release with basic simulation framework
-  - Complete mechanics simulation foundation
-  - Linux-style dark theme implementation
-  - Basic calculation tools and project management
-  - Initial help system and menu structure
-
 ## Acknowledgments
 
 - Real experimental data sourced from peer-reviewed physics literature
@@ -249,4 +233,4 @@ This project is designed as an educational tool for physics simulation and calcu
 
 ---
 
-**Physics Application Suite v2.0** - Real physics, real data, real results! 🔬⚡🌊📊
+**Physics Application Suite v2.0.2** - Real physics, real data, real results! 🔬⚡🌊📊

@@ -2,6 +2,10 @@
 """
 Physics Application - Advanced PyQt5 GUI with Linux-style interface
 A comprehensive physics simulation and calculation tool
+
+Author: BubblesTheDev
+Version: 2.0.2
+Date: February 2026
 """
 
 import sys
@@ -4112,3 +4116,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
